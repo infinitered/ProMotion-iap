@@ -168,7 +168,7 @@ Find the Product ID here:
 
 
 ## Authors
-| Contribuor | Twitter |
+| Contributor | Twitter |
 | Jamon Holmgren | [@jamonholmgren](http://twitter.com/jamonholmgren) |
 | Kevin VanGelder | [@kevinvangelder](http://twitter.com/kevin_vangelder) |
 
