@@ -82,7 +82,9 @@ module ProMotion
 
     def productsRequest(_, didReceiveResponse:response)
       unless response.invalidProductIdentifiers.empty?
-        PM.logger.error "PM::IAP Error - invalid product identifier(s) '#{response.invalidProductIdentifiers.join("', '")}' for application identifier #{NSBundle.mainBundle.infoDictionary['CFBundleIdentifier'].inspect}"
+        red = "\e[0;31m"
+        color_off = "\e[0m"
+        puts "#{red}PM::IAP Error - invalid product identifier(s) '#{response.invalidProductIdentifiers.join("', '")}' for application identifier #{NSBundle.mainBundle.infoDictionary['CFBundleIdentifier'].inspect}#{color_off}"
       end
       retrieved_iaps_handler(response.products, &self.completion_handlers["retrieve_iaps"]) if self.completion_handlers["retrieve_iaps"]
       @products_request = nil
@@ -130,3 +132,4 @@ module ProMotion
 
   end
 end
+::PM = ProMotion unless defined?(::PM)
