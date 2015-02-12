@@ -2,9 +2,9 @@ module ProMotion
   module IAP
     attr_accessor :completion_handlers
 
-    def purchase_iaps(product_id, &callback)
+    def purchase_iaps(*product_ids, &callback)
       iap_setup
-      retrieve_iaps product_id do |products|
+      retrieve_iaps product_ids do |products|
         products.each do |product|
           self.completion_handlers["purchase-#{product[:product_id]}"] = callback
           payment = SKPayment.paymentWithProduct(product[:product])
@@ -14,9 +14,9 @@ module ProMotion
     end
     alias purchase_iap purchase_iaps
 
-    def restore_iaps(product_id, &callback)
+    def restore_iaps(*product_ids, &callback)
       iap_setup
-      retrieve_iaps product_id do |products|
+      retrieve_iaps product_ids do |products|
         products.each do |product|
           self.completion_handlers["restore-#{product[:product_id]}"] = callback
           SKPaymentQueue.defaultQueue.restoreCompletedTransactions
