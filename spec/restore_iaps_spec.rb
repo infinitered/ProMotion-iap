@@ -19,7 +19,7 @@ describe "#restore_iaps" do
       subject = TestIAP.new
       subject.mock!(:completion_handlers, return: {
         "restore-restoredproductid" => ->(success, transaction) {
-          success.should.be.true
+          success.should == :restored
         },
       })
       subject.paymentQueue(nil, updatedTransactions:[ restored_transaction ])

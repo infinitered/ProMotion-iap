@@ -19,6 +19,8 @@ module ProMotion
         products.each do |product|
           self.completion_handlers["restore-#{product[:product_id]}"] = callback
           SKPaymentQueue.defaultQueue.restoreCompletedTransactions
+          PM.logger.debug "restore_iaps"
+          PM.logger.debug product
         end
       end
     end
@@ -84,7 +86,7 @@ module ProMotion
       unless response.invalidProductIdentifiers.empty?
         PM.logger.error "PM::IAP Error - invalid product identifier(s) '#{response.invalidProductIdentifiers.join("', '")}' for application identifier #{NSBundle.mainBundle.infoDictionary['CFBundleIdentifier'].inspect}"
       end
-      retrieved_iaps_handler(response.products, &self.completion_handlers["retrieve_iaps"])
+      retrieved_iaps_handler(response.products, &self.completion_handlers["retrieve_iaps"]) if self.completion_handlers["retrieve_iaps"]
       @products_request = nil
       self.completion_handlers["retrieve_iaps"] = nil
     end
@@ -101,13 +103,15 @@ module ProMotion
     def paymentQueue(_, updatedTransactions:transactions)
       transactions.each do |transaction|
         case transaction.transactionState
-        when SKPaymentTransactionStatePurchased then iap_callback(true,  transaction)
-        when SKPaymentTransactionStateRestored  then iap_callback(true,  transaction)
+        when SKPaymentTransactionStatePurchasing  then iap_callback(:in_progress, transaction)
+        when SKPaymentTransactionStateDeferred    then iap_callback(:deferred,    transaction)
+        when SKPaymentTransactionStatePurchased   then iap_callback(:purchased,  transaction)
+        when SKPaymentTransactionStateRestored    then iap_callback(:restored,  transaction)
         when SKPaymentTransactionStateFailed
           if transaction.error.code == SKErrorPaymentCancelled
-            iap_callback(nil,   transaction)
+            iap_callback(:canceled,   transaction)
           else
-            iap_callback(false, transaction)
+            iap_callback(:error, transaction)
           end
         end
       end

@@ -38,18 +38,26 @@ class PurchaseScreen < PM::Screen
       }, {...}]
     end
 
-    purchase_iap "productid" do |success, transaction|
-      if success
+    purchase_iap "productid" do |status, transaction|
+      case status
+      when :in_progress
+        # Usually do nothing, maybe a spinner
+      when :deferred
+        # Waiting on a prompt to the user
+      when :purchased
         # Notify the user, update any affected UI elements
-      elsif success.nil?
+      when :canceled
         # They just canceled, no big deal.
-      else
-        transaction.error # some error message?
+      when :error
+        # Failed to purchase
+        transaction.error.localizedDescription # => error message
       end
     end
 
-    restore_iaps do |products|
-
+    restore_iaps do |status, products|
+      if status == :restored
+        # Update your UI, notify the user
+      end
     end
 
 
