@@ -15,7 +15,7 @@ describe "#retrieve_iaps" do
       subject = TestIAP.new
 
       mock_response = Struct.new(:products, :error, :invalidProductIdentifiers).new([
-        mock_product.new("id", "title", "desc", BigDecimal.new("0.99"), NSLocale.alloc.initWithLocaleIdentifier("en_US@currency=USD"), false, 0, nil)
+        prod = mock_product.new("id", "title", "desc", BigDecimal.new("0.99"), NSLocale.alloc.initWithLocaleIdentifier("en_US@currency=USD"), false, 0, nil)
       ], nil, [])
 
       subject.mock!(:completion_handlers, return: { "retrieve_iaps" => ->(products, error) {
@@ -30,6 +30,7 @@ describe "#retrieve_iaps" do
         product[:downloadable].should == false
         product[:download_content_lengths].should == 0
         product[:download_content_version].should == nil
+        product[:product].should == prod
 
         error.should.be.nil
       } })

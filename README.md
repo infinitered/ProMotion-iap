@@ -34,6 +34,7 @@ class PurchaseScreen < PM::Screen
         downloadable:             false,
         download_content_lengths: <?>, # TODO: ?
         download_content_version: <?>, # TODO: ?
+        product:                  <SKProduct>
       }, {...}]
     end
 

@@ -7,7 +7,7 @@ module ProMotion
       retrieve_iaps product_id do |products|
         products.each do |product|
           self.completion_handlers["purchase-#{product[:product_id]}"] = callback
-          payment = SKPayment.paymentWithProduct(product)
+          payment = SKPayment.paymentWithProduct(product[:product])
           SKPaymentQueue.defaultQueue.addPayment(payment)
         end
       end
@@ -24,6 +24,7 @@ module ProMotion
     end
 
     def retrieve_iaps(*product_ids, &callback)
+      iap_setup
       self.completion_handlers["retrieve_iaps"] = callback
       @products_request = SKProductsRequest.alloc.initWithProductIdentifiers(NSSet.setWithArray(product_ids.flatten))
       @products_request.delegate = self
@@ -43,6 +44,10 @@ module ProMotion
       SKPaymentQueue.defaultQueue.addTransactionObserver(self)
     end
 
+    def iap_shutdown
+      SKPaymentQueue.defaultQueue.removeTransactionObserver(self)
+    end
+
     def retrieved_iaps_handler(products, &callback)
       sk_products = products.map do |sk_product|
         {
@@ -55,6 +60,7 @@ module ProMotion
           downloadable:             sk_product.isDownloadable,
           download_content_lengths: sk_product.downloadContentLengths,
           download_content_version: sk_product.downloadContentVersion,
+          product:                  sk_product,
         }
       end
 
