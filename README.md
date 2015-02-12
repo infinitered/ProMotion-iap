@@ -22,7 +22,7 @@ class PurchaseScreen < PM::Screen
 
   def on_load
 
-    retrieve_iaps("productid1", "productid2") do |products|
+    retrieve_iaps([ "productid1", "productid2" ]) do |products, error|
       # products looks something like the following
       [{
         product_id:               "productid1",
@@ -40,6 +40,8 @@ class PurchaseScreen < PM::Screen
     purchase_iap "productid" do |success, transaction|
       if success
         # Notify the user, update any affected UI elements
+      elsif success.nil?
+        # They just canceled, no big deal.
       else
         transaction.error # some error message?
       end
@@ -54,26 +56,12 @@ class PurchaseScreen < PM::Screen
 end
 ```
 
-#### register_for_iap_notifications(*types)
+#### purchase_iap(*product_ids, &callback)
 
-Method you can call to register your app for iap notifications. You'll also want to implement
-`on_iap_notification` and `on_iap_registration`.
-
-```ruby
-def on_load(app, options)
-    register_for_iap_notifications :badge, :sound, :alert, :newsstand # or :all
-    # ...
-end
-```
-
-#### TODO
-
-Initiates a purchase with the given product ID.
+TODO
 
 ```ruby
-def logging_out
-  unregister_for_iap_notifications
-end
+
 ```
 
 Find the Product ID here:

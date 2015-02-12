@@ -5,16 +5,20 @@ describe "#retrieve_iaps" do
 
   mock_product = Struct.new(:productIdentifier, :localizedTitle, :localizedDescription, :price, :priceLocale, :isDownloadable, :downloadContentLengths, :downloadContentVersion)
 
-  describe "On response, return an array of mapped hashes" do
+  it "responds to #retrieve_iaps" do
+    TestIAP.new.respond_to?(:retrieve_iaps).should.be.true
+  end
+
+  context "successful request" do
 
     it "returns an array of hashes with the result" do
       subject = TestIAP.new
 
-      mock_response = Struct.new(:products).new([
-        prod = mock_product.new("id", "title", "desc", BigDecimal.new("0.99"), NSLocale.alloc.initWithLocaleIdentifier("en_US@currency=USD"), false, 0, nil)
-      ])
+      mock_response = Struct.new(:products, :error, :invalidProductIdentifiers).new([
+        mock_product.new("id", "title", "desc", BigDecimal.new("0.99"), NSLocale.alloc.initWithLocaleIdentifier("en_US@currency=USD"), false, 0, nil)
+      ], nil, [])
 
-      subject.mock!(:completion_handler, return: ->(products) {
+      subject.mock!(:completion_handlers, return: { "retrieve_iaps" => ->(products, error) {
         products.length.should == 1
         product = products.first
         product[:product_id].should == "id"
@@ -26,9 +30,28 @@ describe "#retrieve_iaps" do
         product[:downloadable].should == false
         product[:download_content_lengths].should == 0
         product[:download_content_version].should == nil
-      })
+
+        error.should.be.nil
+      } })
 
       subject.productsRequest(nil, didReceiveResponse:mock_response)
+    end
+
+  end
+
+  context "unsuccessful request" do
+
+    subject = TestIAP.new
+    mock_response = Struct.new(:products, :error, :invalidProductIdentifiers).new([], "Invalid product ID", ["invalidproductid"])
+
+    it "fails with error" do
+      subject.mock!(:completion_handlers, return: {
+        "retrieve_iaps" => ->(products, error) {
+          products.length.should == 0
+          error.error.should == "Invalid product ID"
+        },
+      })
+      subject.request(nil, didFailWithError:mock_response)
     end
 
   end
