@@ -1,5 +1,3 @@
-class AppDelegate < ProMotion::Delegate
+class AppDelegate
 
-  def on_load(app, options)
-  end
 end
