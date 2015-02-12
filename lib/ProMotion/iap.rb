@@ -2,7 +2,7 @@ module ProMotion
   module IAP
     attr_accessor :completion_handlers
 
-    def purchase_iap(product_id, &callback)
+    def purchase_iaps(product_id, &callback)
       iap_setup
       retrieve_iaps product_id do |products|
         products.each do |product|
@@ -12,6 +12,7 @@ module ProMotion
         end
       end
     end
+    alias purchase_iap purchase_iaps
 
     def restore_iaps(product_id, &callback)
       iap_setup
@@ -22,6 +23,7 @@ module ProMotion
         end
       end
     end
+    alias restore_iap restore_iaps
 
     def retrieve_iaps(*product_ids, &callback)
       iap_setup
@@ -76,6 +78,19 @@ module ProMotion
       num_formatter.stringFromNumber price
     end
 
+    def iap_callback(status, transaction, finish=false)
+      product_id = transaction.payment.productIdentifier
+      if self.completion_handlers["purchase-#{product_id}"]
+        self.completion_handlers["purchase-#{product_id}"].call status, transaction
+        self.completion_handlers["purchase-#{product_id}"] = nil if finish
+      end
+      if self.completion_handlers["restore-#{product_id}"]
+        self.completion_handlers["restore-#{product_id}"].call status, transaction
+        self.completion_handlers["restore-#{product_id}"] = nil if finish
+      end
+      SKPaymentQueue.defaultQueue.finishTransaction(transaction) if finish
+    end
+
     public
 
     # SKProductsRequestDelegate methods
@@ -115,19 +130,6 @@ module ProMotion
           end
         end
       end
-    end
-
-    def iap_callback(status, transaction, finish=false)
-      product_id = transaction.payment.productIdentifier
-      if self.completion_handlers["purchase-#{product_id}"]
-        self.completion_handlers["purchase-#{product_id}"].call status, transaction
-        self.completion_handlers["purchase-#{product_id}"] = nil if finish
-      end
-      if self.completion_handlers["restore-#{product_id}"]
-        self.completion_handlers["restore-#{product_id}"].call status, transaction
-        self.completion_handlers["restore-#{product_id}"] = nil if finish
-      end
-      SKPaymentQueue.defaultQueue.finishTransaction(transaction) if finish
     end
 
   end
