@@ -18,8 +18,8 @@ describe "#purchase_iap" do
     it "returns success" do
       subject = TestIAP.new
       subject.mock!(:completion_handlers, return: {
-        "purchase-successfulproductid" => ->(success, transaction) {
-          success.should === :purchased
+        "purchase-successfulproductid" => ->(status, transaction) {
+          status.should === :purchased
         },
       })
       subject.paymentQueue(nil, updatedTransactions:[ successful_transaction ])
@@ -32,8 +32,8 @@ describe "#purchase_iap" do
     it "returns nil error" do
       subject = TestIAP.new
       subject.mock!(:completion_handlers, return: {
-        "purchase-canceledproductid" => ->(success, transaction) {
-          success.should == :canceled
+        "purchase-canceledproductid" => ->(status, transaction) {
+          status.should == :canceled
         },
       })
       subject.paymentQueue(nil, updatedTransactions:[ canceled_transaction ])
@@ -46,8 +46,8 @@ describe "#purchase_iap" do
     it "returns an error" do
       subject = TestIAP.new
       subject.mock!(:completion_handlers, return: {
-        "purchase-invalidproductid" => ->(success, transaction) {
-          success.should == :error
+        "purchase-invalidproductid" => ->(status, transaction) {
+          status.should == :error
         },
       })
       subject.paymentQueue(nil, updatedTransactions:[ invalid_transaction ])
