@@ -19,8 +19,6 @@ module ProMotion
         products.each do |product|
           self.completion_handlers["restore-#{product[:product_id]}"] = callback
           SKPaymentQueue.defaultQueue.restoreCompletedTransactions
-          PM.logger.debug "restore_iaps"
-          PM.logger.debug product
         end
       end
     end
@@ -105,29 +103,29 @@ module ProMotion
         case transaction.transactionState
         when SKPaymentTransactionStatePurchasing  then iap_callback(:in_progress, transaction)
         when SKPaymentTransactionStateDeferred    then iap_callback(:deferred,    transaction)
-        when SKPaymentTransactionStatePurchased   then iap_callback(:purchased,  transaction)
-        when SKPaymentTransactionStateRestored    then iap_callback(:restored,  transaction)
+        when SKPaymentTransactionStatePurchased   then iap_callback(:purchased,   transaction, true)
+        when SKPaymentTransactionStateRestored    then iap_callback(:restored,    transaction, true)
         when SKPaymentTransactionStateFailed
           if transaction.error.code == SKErrorPaymentCancelled
-            iap_callback(:canceled,   transaction)
+            iap_callback(:canceled, transaction, true)
           else
-            iap_callback(:error, transaction)
+            iap_callback(:error, transaction, true)
           end
         end
       end
     end
 
-    def iap_callback(success, transaction)
+    def iap_callback(success, transaction, finish=false)
       product_id = transaction.payment.productIdentifier
       if self.completion_handlers["purchase-#{product_id}"]
         self.completion_handlers["purchase-#{product_id}"].call success, transaction
-        self.completion_handlers["purchase-#{product_id}"] = nil
+        self.completion_handlers["purchase-#{product_id}"] = nil if finish
       end
       if self.completion_handlers["restore-#{product_id}"]
         self.completion_handlers["restore-#{product_id}"].call success, transaction
-        self.completion_handlers["restore-#{product_id}"] = nil
+        self.completion_handlers["restore-#{product_id}"] = nil if finish
       end
-      SKPaymentQueue.defaultQueue.finishTransaction(transaction)
+      SKPaymentQueue.defaultQueue.finishTransaction(transaction) if finish
     end
 
   end
