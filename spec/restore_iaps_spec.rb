@@ -3,16 +3,17 @@ describe "#restore_iaps" do
     include PM::IAP
   end
 
-  mock_transaction = Struct.new(:transactionState, :error, :productIdentifier) do
+  mock_transaction = Struct.new(:transactionState, :error, :payment) do
     def matchingIdentifier; end
   end
+  mock_payment = Struct.new(:productIdentifier)
 
   it "responds to #restore_iaps" do
     TestIAP.new.respond_to?(:restore_iaps).should.be.true
   end
 
   context "restored transaction" do
-    restored_transaction = mock_transaction.new(SKPaymentTransactionStateRestored, Struct.new(:code).new(nil), "restoredproductid")
+    restored_transaction = mock_transaction.new(SKPaymentTransactionStateRestored, Struct.new(:code).new(nil), mock_payment.new("restoredproductid"))
 
     it "returns success" do
       subject = TestIAP.new

@@ -3,16 +3,17 @@ describe "#purchase_iap" do
     include PM::IAP
   end
 
-  mock_transaction = Struct.new(:transactionState, :error, :productIdentifier) do
+  mock_transaction = Struct.new(:transactionState, :error, :payment) do
     def matchingIdentifier; end
   end
+  mock_payment = Struct.new(:productIdentifier)
 
   it "responds to #purchase_iap" do
     TestIAP.new.respond_to?(:purchase_iap).should.be.true
   end
 
   context "successful transaction" do
-    successful_transaction = mock_transaction.new(SKPaymentTransactionStatePurchased, Struct.new(:code).new(nil), "successfulproductid")
+    successful_transaction = mock_transaction.new(SKPaymentTransactionStatePurchased, Struct.new(:code).new(nil), mock_payment.new("successfulproductid"))
 
     it "returns success" do
       subject = TestIAP.new
@@ -26,7 +27,7 @@ describe "#purchase_iap" do
   end
 
   context "canceled transaction" do
-    canceled_transaction = mock_transaction.new(SKPaymentTransactionStateFailed, Struct.new(:code).new(SKErrorPaymentCancelled), "canceledproductid")
+    canceled_transaction = mock_transaction.new(SKPaymentTransactionStateFailed, Struct.new(:code).new(SKErrorPaymentCancelled), mock_payment.new("canceledproductid"))
 
     it "returns nil error" do
       subject = TestIAP.new
@@ -40,7 +41,7 @@ describe "#purchase_iap" do
   end
 
   context "invalid product" do
-    invalid_transaction = mock_transaction.new(SKPaymentTransactionStateFailed, Struct.new(:code).new(nil), "invalidproductid")
+    invalid_transaction = mock_transaction.new(SKPaymentTransactionStateFailed, Struct.new(:code).new(nil), mock_payment.new("invalidproductid"))
 
     it "returns an error" do
       subject = TestIAP.new

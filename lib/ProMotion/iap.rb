@@ -114,13 +114,14 @@ module ProMotion
     end
 
     def iap_callback(success, transaction)
-      if self.completion_handlers["purchase-#{transaction.productIdentifier}"]
-        self.completion_handlers["purchase-#{transaction.productIdentifier}"].call success, transaction
-        self.completion_handlers["purchase-#{transaction.productIdentifier}"] = nil
+      product_id = transaction.payment.productIdentifier
+      if self.completion_handlers["purchase-#{product_id}"]
+        self.completion_handlers["purchase-#{product_id}"].call success, transaction
+        self.completion_handlers["purchase-#{product_id}"] = nil
       end
-      if self.completion_handlers["restore-#{transaction.productIdentifier}"]
-        self.completion_handlers["restore-#{transaction.productIdentifier}"].call success, transaction
-        self.completion_handlers["restore-#{transaction.productIdentifier}"] = nil
+      if self.completion_handlers["restore-#{product_id}"]
+        self.completion_handlers["restore-#{product_id}"].call success, transaction
+        self.completion_handlers["restore-#{product_id}"] = nil
       end
       SKPaymentQueue.defaultQueue.finishTransaction(transaction)
     end
