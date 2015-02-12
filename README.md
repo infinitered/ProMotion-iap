@@ -14,7 +14,7 @@ gem 'ProMotion-iap'
 
 ## Usage
 
-### IAP::Product Class
+### PM::IAP::Product Class
 
 The `Product` class is an abstraction layer that provides a simpler interface when working with a single IAP product.
  If you are dealing with multiple products you will want to use the IAP Module directly (documented below).
@@ -58,7 +58,7 @@ class PurchaseScreen < PM::Screen
       end
     end
 
-    product.restore do |status, products|
+    product.restore do |status, product|
       if status == :restored
         # Update your UI, notify the user
       end
@@ -71,7 +71,7 @@ end
 
 #### Product.new(product_id)
 
-Stores the product_id for use in the class methods.
+Stores the product_id for use in the instance methods.
 
 #### retrieve(&callback)
 
@@ -97,7 +97,7 @@ class PurchaseScreen < PM::Screen
 
   def on_load
 
-    retrieve_iaps[ "productid1", "productid2" ] do |products, error|
+    retrieve_iaps [ "productid1", "productid2" ] do |products, error|
       # products looks something like the following
       [{
         product_id:               "productid1",
@@ -140,19 +140,19 @@ class PurchaseScreen < PM::Screen
 end
 ```
 
-#### retrieve_iaps(*product_ids, &callback)
+#### retrieve_iaps(`*`product_ids, &callback)
 
 Retrieves in-app purchase products in an array of mapped hashes. The callback method should accept `products` and `error`.
 
 
-#### purchase_iaps(*product_ids, &callback)
+#### purchase_iaps(`*`product_ids, &callback)
 
 Prompts the user to login to their Apple ID and complete the purchase. The callback method should accept `status` and `transaction`.
  The callback method will be called several times with the various statuses in the process. If more than one `product_id` is provided
  the callback method will be called several times per product with the applicable transaction.
 
 
-#### restore_iaps(*product_ids, &callback)
+#### restore_iaps(`*`product_ids, &callback)
 
 Restores a previously purchased IAP to the user (for example if they have upgraded their device). This relies on the Apple ID the user
  enters at the prompt. Unfortunately, if there is no purchase to restore for the signed-in account, no error message is generated and 
@@ -170,7 +170,7 @@ Find the Product ID here:
 ## Authors
 | Contribuor | Twitter |
 | Jamon Holmgren | [@jamonholmgren](http://twitter.com/jamonholmgren) |
-| Kevin VanGelder | [@kevinvangelder](http://twitter.com/kevinvangelder) |
+| Kevin VanGelder | [@kevinvangelder](http://twitter.com/kevin_vangelder) |
 
 ## Inspired By
 - [Helu](https://github.com/ivanacostarubio/helu)
