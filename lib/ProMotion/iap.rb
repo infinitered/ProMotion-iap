@@ -2,12 +2,15 @@ module ProMotion
   module IAP
     attr_accessor :completion_handlers
 
-    def purchase_iaps(*product_ids, &callback)
+    def purchase_iaps(product_ids, options={}, &callback)
       iap_setup
       retrieve_iaps product_ids do |products|
         products.each do |product|
           self.completion_handlers["purchase-#{product[:product_id]}"] = callback
-          payment = SKPayment.paymentWithProduct(product[:product])
+
+          payment = SKMutablePayment.paymentWithProduct(product[:product])
+          payment.applicationUsername = options[:username] if options[:username]
+
           SKPaymentQueue.defaultQueue.addPayment(payment)
         end
       end
@@ -19,8 +22,9 @@ module ProMotion
       retrieve_iaps product_ids do |products|
         products.each do |product|
           self.completion_handlers["restore-#{product[:product_id]}"] = callback
-          SKPaymentQueue.defaultQueue.restoreCompletedTransactions
         end
+
+        SKPaymentQueue.defaultQueue.restoreCompletedTransactions
       end
     end
     alias restore_iap restore_iaps
