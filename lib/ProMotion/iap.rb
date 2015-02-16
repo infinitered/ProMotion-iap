@@ -29,7 +29,7 @@ module ProMotion
         end
 
         if options[:username]
-          puts "attempting to restore with username"
+          puts "attempting to restore with username: #{options[:username]}"
           SKPaymentQueue.defaultQueue.restoreCompletedTransactionsWithApplicationUsername(options[:username])
         else
           SKPaymentQueue.defaultQueue.restoreCompletedTransactions
