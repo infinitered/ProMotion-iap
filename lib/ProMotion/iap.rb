@@ -17,14 +17,18 @@ module ProMotion
     end
     alias purchase_iap purchase_iaps
 
-    def restore_iaps(*product_ids, &callback)
+    def restore_iaps(product_ids, options={}, &callback)
       iap_setup
-      retrieve_iaps product_ids do |products|
+      retrieve_iaps Array(product_ids) do |products|
         products.each do |product|
           self.completion_handlers["restore-#{product[:product_id]}"] = callback
         end
 
-        SKPaymentQueue.defaultQueue.restoreCompletedTransactions
+        if options[:username]
+          SKPaymentQueue.defaultQueue.restoreCompletedTransactionsWithApplicationUsername(options[:username])
+        else
+          SKPaymentQueue.defaultQueue.restoreCompletedTransactions
+        end
       end
     end
     alias restore_iap restore_iaps
