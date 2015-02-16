@@ -1,7 +1,7 @@
 # ProMotion-iap
 
 [![Gem Version](https://badge.fury.io/rb/ProMotion-iap.svg)](http://badge.fury.io/rb/ProMotion-iap)
-[![Build Status](https://travis-ci.org/clearsightstudio/ProMotion-iap.svg)](https://travis-ci.org/clearsightstudio/ProMotion-iap) 
+[![Build Status](https://travis-ci.org/clearsightstudio/ProMotion-iap.svg)](https://travis-ci.org/clearsightstudio/ProMotion-iap)
 
 ProMotion-iap is in-app purchase notification support for the
  popular RubyMotion gem [ProMotion](https://github.com/clearsightstudio/ProMotion).
@@ -113,7 +113,7 @@ class PurchaseScreen < PM::Screen
       }, {...}]
     end
 
-    purchase_iap "productid" do |status, transaction|
+    purchase_iaps [ "productid" ], username: User.current.username do |status, transaction|
       case status
       when :in_progress
         # Usually do nothing, maybe a spinner
@@ -129,9 +129,13 @@ class PurchaseScreen < PM::Screen
       end
     end
 
-    restore_iaps "productid" do |status, products|
+    restore_iaps [ "productid" ], username: User.current.username do |status, transaction|
       if status == :restored
         # Update your UI, notify the user
+      elsif status == :error
+        # Update your UI to show that there was an error.
+        # `transaction` will be an error in this case.
+        transaction.localizedDescription # => description of error
       end
     end
 
@@ -155,7 +159,7 @@ Prompts the user to login to their Apple ID and complete the purchase. The callb
 #### restore_iaps(`*`product_ids, &callback)
 
 Restores a previously purchased IAP to the user (for example if they have upgraded their device). This relies on the Apple ID the user
- enters at the prompt. Unfortunately, if there is no purchase to restore for the signed-in account, no error message is generated and 
+ enters at the prompt. Unfortunately, if there is no purchase to restore for the signed-in account, no error message is generated and
  will fail silently.
 
 

@@ -27,6 +27,7 @@ module ProMotion
           puts "Adding completion_handler for #{product.inspect}"
           self.completion_handlers["restore-#{product[:product_id]}"] = callback
         end
+        self.completion_handlers["restore-all"] = callback # In case of error
 
         if options[:username]
           puts "attempting to restore with username: #{options[:username]}"
@@ -60,6 +61,7 @@ module ProMotion
     end
 
     def iap_shutdown
+      @completion_handlers = nil
       SKPaymentQueue.defaultQueue.removeTransactionObserver(self)
     end
 
@@ -92,7 +94,8 @@ module ProMotion
     end
 
     def iap_callback(status, transaction, finish=false)
-      product_id = transaction.payment.productIdentifier
+      product_id = transaction.payment.productIdentifier if transaction.is_a?(SKPaymentTransaction)
+      product_id ||= "all" # Restore error
       if self.completion_handlers["purchase-#{product_id}"]
         self.completion_handlers["purchase-#{product_id}"].call status, transaction
         self.completion_handlers["purchase-#{product_id}"] = nil if finish
@@ -143,6 +146,10 @@ module ProMotion
           end
         end
       end
+    end
+
+    def paymentQueue(_, restoreCompletedTransactionsFailedWithError:error)
+      iap_callback(:error, error)
     end
 
   end
