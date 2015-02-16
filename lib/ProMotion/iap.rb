@@ -94,17 +94,39 @@ module ProMotion
     end
 
     def iap_callback(status, transaction, finish=false)
-      product_id = transaction.payment.productIdentifier if transaction.is_a?(SKPaymentTransaction)
-      product_id ||= "all" # Restore error
+      product_id ||= transaction_product_id(transaction)
+
       if self.completion_handlers["purchase-#{product_id}"]
-        self.completion_handlers["purchase-#{product_id}"].call status, transaction
+        self.completion_handlers["purchase-#{product_id}"].call status, mapped_transaction(transaction)
         self.completion_handlers["purchase-#{product_id}"] = nil if finish
       end
+
       if self.completion_handlers["restore-#{product_id}"]
-        self.completion_handlers["restore-#{product_id}"].call status, transaction
+        self.completion_handlers["restore-#{product_id}"].call status, mapped_transaction(transaction)
         self.completion_handlers["restore-#{product_id}"] = nil if finish
       end
+
       SKPaymentQueue.defaultQueue.finishTransaction(transaction) if finish
+    end
+
+    def mapped_transaction(transaction)
+      if transaction.is_a?(SKPaymentTransaction)
+        {
+          product_id:   transaction.payment.productIdentifier,
+          error:        transaction.error && transaction.error.localizedDescription,
+          transaction:  transaction
+        }
+      else
+        {
+          product_id:   nil,
+          error:        transaction,
+          transaction:  nil
+        }
+      end
+    end
+
+    def transaction_product_id(transaction)
+      transaction.is_a?(SKPaymentTransaction) ? transaction.payment.productIdentifier : "all"
     end
 
     public

@@ -18,8 +18,11 @@ describe "#restore_iaps" do
     it "returns success" do
       subject = TestIAP.new
       subject.mock!(:completion_handlers, return: {
-        "restore-restoredproductid" => ->(status, transaction) {
+        "restore-restoredproductid" => ->(status, data) {
           status.should == :restored
+          data[:product_id].should == "restoredproductid"
+          data[:error].should.be.nil
+          data[:transaction].transactionState.should == SKPaymentTransactionStateRestored
         },
       })
       subject.paymentQueue(nil, updatedTransactions:[ restored_transaction ])
@@ -32,9 +35,11 @@ describe "#restore_iaps" do
     it "returns success" do
       subject = TestIAP.new
       subject.mock!(:completion_handlers, return: {
-        "restore-all" => ->(status, transaction) {
+        "restore-all" => ->(status, data) {
           status.should == :error
-          transaction.localizedDescription.should == "Failed to restore"
+          data[:product_id].should.be.nil
+          data[:error].localizedDescription.should == "Failed to restore"
+          data[:transaction].should.be.nil
         },
       })
       subject.paymentQueue(nil, restoreCompletedTransactionsFailedWithError:Struct.new(:localizedDescription).new("Failed to restore"))

@@ -129,13 +129,16 @@ class PurchaseScreen < PM::Screen
       end
     end
 
-    restore_iaps [ "productid" ], username: User.current.username do |status, transaction|
+    restore_iaps [ "productid" ], username: User.current.username do |status, data|
       if status == :restored
         # Update your UI, notify the user
+        # This is called once for each product you're trying to restore.
+        data[:product_id] # => "productid"
       elsif status == :error
         # Update your UI to show that there was an error.
-        # `transaction` will be an error in this case.
-        transaction.localizedDescription # => description of error
+        # This will only be called once, no matter how many products you are trying to restore.
+        # You'll get an NSError in your `data` hash.
+        data[:error].localizedDescription # => description of error
       end
     end
 
