@@ -2,23 +2,32 @@ module ProMotion
   module IAP
     attr_accessor :completion_handlers
 
-    def purchase_iaps(*product_ids, &callback)
+    def purchase_iaps(product_ids, options={}, &callback)
       iap_setup
       retrieve_iaps product_ids do |products|
         products.each do |product|
           self.completion_handlers["purchase-#{product[:product_id]}"] = callback
-          payment = SKPayment.paymentWithProduct(product[:product])
+
+          payment = SKMutablePayment.paymentWithProduct(product[:product])
+          payment.applicationUsername = options[:username] if options[:username]
+
           SKPaymentQueue.defaultQueue.addPayment(payment)
         end
       end
     end
     alias purchase_iap purchase_iaps
 
-    def restore_iaps(*product_ids, &callback)
+    def restore_iaps(product_ids, options={}, &callback)
       iap_setup
-      retrieve_iaps product_ids do |products|
+      retrieve_iaps Array(product_ids) do |products|
         products.each do |product|
           self.completion_handlers["restore-#{product[:product_id]}"] = callback
+        end
+        self.completion_handlers["restore-all"] = callback # In case of error
+
+        if options[:username]
+          SKPaymentQueue.defaultQueue.restoreCompletedTransactionsWithApplicationUsername(options[:username])
+        else
           SKPaymentQueue.defaultQueue.restoreCompletedTransactions
         end
       end
@@ -47,6 +56,7 @@ module ProMotion
     end
 
     def iap_shutdown
+      @completion_handlers = nil
       SKPaymentQueue.defaultQueue.removeTransactionObserver(self)
     end
 
@@ -79,16 +89,39 @@ module ProMotion
     end
 
     def iap_callback(status, transaction, finish=false)
-      product_id = transaction.payment.productIdentifier
+      product_id = transaction_product_id(transaction)
+
       if self.completion_handlers["purchase-#{product_id}"]
-        self.completion_handlers["purchase-#{product_id}"].call status, transaction
+        self.completion_handlers["purchase-#{product_id}"].call status, mapped_transaction(transaction)
         self.completion_handlers["purchase-#{product_id}"] = nil if finish
       end
+
       if self.completion_handlers["restore-#{product_id}"]
-        self.completion_handlers["restore-#{product_id}"].call status, transaction
+        self.completion_handlers["restore-#{product_id}"].call status, mapped_transaction(transaction)
         self.completion_handlers["restore-#{product_id}"] = nil if finish
       end
+
       SKPaymentQueue.defaultQueue.finishTransaction(transaction) if finish
+    end
+
+    def mapped_transaction(transaction)
+      if transaction.respond_to?(:payment)
+        {
+          product_id:   transaction.payment.productIdentifier,
+          error:        transaction.error,
+          transaction:  transaction
+        }
+      else
+        {
+          product_id:   nil,
+          error:        transaction,
+          transaction:  nil
+        }
+      end
+    end
+
+    def transaction_product_id(transaction)
+      transaction.respond_to?(:payment) ? transaction.payment.productIdentifier : "all"
     end
 
     public
@@ -99,7 +132,6 @@ module ProMotion
       unless response.invalidProductIdentifiers.empty?
         red = "\e[0;31m"
         color_off = "\e[0m"
-        puts "#{red}PM::IAP Error - invalid product identifier(s) '#{response.invalidProductIdentifiers.join("', '")}' for application identifier #{NSBundle.mainBundle.infoDictionary['CFBundleIdentifier'].inspect}#{color_off}"
       end
       retrieved_iaps_handler(response.products, &self.completion_handlers["retrieve_iaps"]) if self.completion_handlers["retrieve_iaps"]
       @products_request = nil
@@ -130,6 +162,10 @@ module ProMotion
           end
         end
       end
+    end
+
+    def paymentQueue(_, restoreCompletedTransactionsFailedWithError:error)
+      iap_callback(:error, error)
     end
 
   end
