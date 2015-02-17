@@ -18,19 +18,14 @@ module ProMotion
     alias purchase_iap purchase_iaps
 
     def restore_iaps(product_ids, options={}, &callback)
-      puts "iap_setup"
       iap_setup
-      puts "attempting to retrieve_iaps #{product_ids}"
       retrieve_iaps Array(product_ids) do |products|
-        puts "in retrieve_iaps"
         products.each do |product|
-          puts "Adding completion_handler for #{product.inspect}"
           self.completion_handlers["restore-#{product[:product_id]}"] = callback
         end
         self.completion_handlers["restore-all"] = callback # In case of error
 
         if options[:username]
-          puts "attempting to restore with username: #{options[:username]}"
           SKPaymentQueue.defaultQueue.restoreCompletedTransactionsWithApplicationUsername(options[:username])
         else
           SKPaymentQueue.defaultQueue.restoreCompletedTransactions
@@ -94,7 +89,7 @@ module ProMotion
     end
 
     def iap_callback(status, transaction, finish=false)
-      product_id ||= transaction_product_id(transaction)
+      product_id = transaction_product_id(transaction)
 
       if self.completion_handlers["purchase-#{product_id}"]
         self.completion_handlers["purchase-#{product_id}"].call status, mapped_transaction(transaction)
@@ -110,10 +105,10 @@ module ProMotion
     end
 
     def mapped_transaction(transaction)
-      if transaction.is_a?(SKPaymentTransaction)
+      if transaction.respond_to?(:payment)
         {
           product_id:   transaction.payment.productIdentifier,
-          error:        transaction.error && transaction.error.localizedDescription,
+          error:        transaction.error,
           transaction:  transaction
         }
       else
@@ -126,7 +121,7 @@ module ProMotion
     end
 
     def transaction_product_id(transaction)
-      transaction.is_a?(SKPaymentTransaction) ? transaction.payment.productIdentifier : "all"
+      transaction.respond_to?(:payment) ? transaction.payment.productIdentifier : "all"
     end
 
     public
@@ -137,7 +132,6 @@ module ProMotion
       unless response.invalidProductIdentifiers.empty?
         red = "\e[0;31m"
         color_off = "\e[0m"
-        puts "#{red}PM::IAP Error - invalid product identifier(s) '#{response.invalidProductIdentifiers.join("', '")}' for application identifier #{NSBundle.mainBundle.infoDictionary['CFBundleIdentifier'].inspect}#{color_off}"
       end
       retrieved_iaps_handler(response.products, &self.completion_handlers["retrieve_iaps"]) if self.completion_handlers["retrieve_iaps"]
       @products_request = nil

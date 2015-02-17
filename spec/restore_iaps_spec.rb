@@ -21,7 +21,7 @@ describe "#restore_iaps" do
         "restore-restoredproductid" => ->(status, data) {
           status.should == :restored
           data[:product_id].should == "restoredproductid"
-          data[:error].should.be.nil
+          data[:error].code.should.be.nil
           data[:transaction].transactionState.should == SKPaymentTransactionStateRestored
         },
       })

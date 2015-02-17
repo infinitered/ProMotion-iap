@@ -16,13 +16,18 @@ describe "#purchase_iap" do
     successful_transaction = mock_transaction.new(SKPaymentTransactionStatePurchased, Struct.new(:code).new(nil), mock_payment.new("successfulproductid"))
 
     it "returns success" do
+      called_callback = false
       subject = TestIAP.new
       subject.mock!(:completion_handlers, return: {
-        "purchase-successfulproductid" => ->(status, transaction) {
+        "purchase-successfulproductid" => ->(status, data) {
           status.should === :purchased
+          data[:transaction].transactionState.should == SKPaymentTransactionStatePurchased
+          data[:error].code.should.be.nil
+          called_callback = true
         },
       })
       subject.paymentQueue(nil, updatedTransactions:[ successful_transaction ])
+      called_callback.should.be.true
     end
   end
 
@@ -30,13 +35,18 @@ describe "#purchase_iap" do
     canceled_transaction = mock_transaction.new(SKPaymentTransactionStateFailed, Struct.new(:code).new(SKErrorPaymentCancelled), mock_payment.new("canceledproductid"))
 
     it "returns nil error" do
+      called_callback = false
       subject = TestIAP.new
       subject.mock!(:completion_handlers, return: {
-        "purchase-canceledproductid" => ->(status, transaction) {
+        "purchase-canceledproductid" => ->(status, data) {
           status.should == :canceled
+          data[:transaction].should == canceled_transaction
+          data[:error].code.should == SKErrorPaymentCancelled
+          called_callback = true
         },
       })
       subject.paymentQueue(nil, updatedTransactions:[ canceled_transaction ])
+      called_callback.should.be.true
     end
   end
 
@@ -44,13 +54,18 @@ describe "#purchase_iap" do
     invalid_transaction = mock_transaction.new(SKPaymentTransactionStateFailed, Struct.new(:code).new(nil), mock_payment.new("invalidproductid"))
 
     it "returns an error" do
+      called_callback = false
       subject = TestIAP.new
       subject.mock!(:completion_handlers, return: {
-        "purchase-invalidproductid" => ->(status, transaction) {
+        "purchase-invalidproductid" => ->(status, data) {
           status.should == :error
+          data[:transaction].should == invalid_transaction
+          data[:error].code.should.be.nil
+          called_callback = true
         },
       })
       subject.paymentQueue(nil, updatedTransactions:[ invalid_transaction ])
+      called_callback.should.be.true
     end
   end
 

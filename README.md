@@ -42,7 +42,7 @@ class PurchaseScreen < PM::Screen
       }
     end
 
-    product.purchase do |status, transaction|
+    product.purchase do |status, data|
       case status
       when :in_progress
         # Usually do nothing, maybe a spinner
@@ -54,13 +54,16 @@ class PurchaseScreen < PM::Screen
         # They just canceled, no big deal.
       when :error
         # Failed to purchase
-        transaction.error.localizedDescription # => error message
+        data[:error].localizedDescription # => error message
       end
     end
 
-    product.restore do |status, product|
+    product.restore do |status, data|
       if status == :restored
         # Update your UI, notify the user
+        # data is a hash with :product_id, :error, and :transaction
+      else
+        # Tell the user it failed to restore
       end
     end
 
