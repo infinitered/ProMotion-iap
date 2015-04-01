@@ -1,6 +1,6 @@
 module ProMotion
   class IAP::Product
-    include PM::IAP
+    include ProMotion::IAP
 
     attr_reader :product_id
 
@@ -25,3 +25,4 @@ module ProMotion
     end
   end
 end
+::PM = ProMotion unless defined?(PM)

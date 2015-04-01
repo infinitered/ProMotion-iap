@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ProMotion-iap (0.2.0)
+    ProMotion-iap (0.2.1.beta1)
 
 GEM
   remote: https://rubygems.org/
