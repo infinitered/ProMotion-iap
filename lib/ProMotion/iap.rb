@@ -47,48 +47,6 @@ module ProMotion
       @completion_handlers ||= {}
     end
 
-    # SKProductsRequestDelegate methods
-
-    def productsRequest(_, didReceiveResponse:response)
-      unless response.invalidProductIdentifiers.empty?
-        red = "\e[0;31m"
-        color_off = "\e[0m"
-      end
-      retrieved_iaps_handler(response.products, &self.completion_handlers["retrieve_iaps"]) if self.completion_handlers["retrieve_iaps"]
-      @products_request = nil
-      self.completion_handlers["retrieve_iaps"] = nil
-    end
-
-    def request(_, didFailWithError:error)
-      self.completion_handlers["retrieve_iaps"].call([], error) if self.completion_handlers["retrieve_iaps"].arity == 2
-      self.completion_handlers["retrieve_iaps"].call([]) if self.completion_handlers["retrieve_iaps"].arity < 2
-      @products_request = nil
-      self.completion_handlers["retrieve_iaps"] = nil
-    end
-
-    # SKPaymentTransactionObserver methods
-
-    def paymentQueue(_, updatedTransactions:transactions)
-      transactions.each do |transaction|
-        case transaction.transactionState
-        when SKPaymentTransactionStatePurchasing  then iap_callback(:in_progress, transaction)
-        when SKPaymentTransactionStateDeferred    then iap_callback(:deferred,    transaction)
-        when SKPaymentTransactionStatePurchased   then iap_callback(:purchased,   transaction, true)
-        when SKPaymentTransactionStateRestored    then iap_callback(:restored,    transaction, true)
-        when SKPaymentTransactionStateFailed
-          if transaction.error.code == SKErrorPaymentCancelled
-            iap_callback(:canceled, transaction, true)
-          else
-            iap_callback(:error, transaction, true)
-          end
-        end
-      end
-    end
-
-    def paymentQueue(_, restoreCompletedTransactionsFailedWithError:error)
-      iap_callback(:error, error)
-    end
-
     private
 
     def iap_setup
@@ -162,6 +120,50 @@ module ProMotion
 
     def transaction_product_id(transaction)
       transaction.respond_to?(:payment) ? transaction.payment.productIdentifier : "all"
+    end
+
+    public
+
+    # SKProductsRequestDelegate methods
+
+    def productsRequest(_, didReceiveResponse:response)
+      unless response.invalidProductIdentifiers.empty?
+        red = "\e[0;31m"
+        color_off = "\e[0m"
+      end
+      retrieved_iaps_handler(response.products, &self.completion_handlers["retrieve_iaps"]) if self.completion_handlers["retrieve_iaps"]
+      @products_request = nil
+      self.completion_handlers["retrieve_iaps"] = nil
+    end
+
+    def request(_, didFailWithError:error)
+      self.completion_handlers["retrieve_iaps"].call([], error) if self.completion_handlers["retrieve_iaps"].arity == 2
+      self.completion_handlers["retrieve_iaps"].call([]) if self.completion_handlers["retrieve_iaps"].arity < 2
+      @products_request = nil
+      self.completion_handlers["retrieve_iaps"] = nil
+    end
+
+    # SKPaymentTransactionObserver methods
+
+    def paymentQueue(_, updatedTransactions:transactions)
+      transactions.each do |transaction|
+        case transaction.transactionState
+        when SKPaymentTransactionStatePurchasing  then iap_callback(:in_progress, transaction)
+        when SKPaymentTransactionStateDeferred    then iap_callback(:deferred,    transaction)
+        when SKPaymentTransactionStatePurchased   then iap_callback(:purchased,   transaction, true)
+        when SKPaymentTransactionStateRestored    then iap_callback(:restored,    transaction, true)
+        when SKPaymentTransactionStateFailed
+          if transaction.error.code == SKErrorPaymentCancelled
+            iap_callback(:canceled, transaction, true)
+          else
+            iap_callback(:error, transaction, true)
+          end
+        end
+      end
+    end
+
+    def paymentQueue(_, restoreCompletedTransactionsFailedWithError:error)
+      iap_callback(:error, error)
     end
 
   end
