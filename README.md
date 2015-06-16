@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/clearsightstudio/ProMotion-iap.svg)](https://travis-ci.org/clearsightstudio/ProMotion-iap)
 
 ProMotion-iap is in-app purchase notification support for the
- popular RubyMotion gem [ProMotion](https://github.com/clearsightstudio/ProMotion).
+ popular RubyMotion gem [ProMotion](https://github.com/clearsightstudio/ProMotion). It also works as a stand-alone gem if you are not using ProMotion.
 
 ## Installation
 
