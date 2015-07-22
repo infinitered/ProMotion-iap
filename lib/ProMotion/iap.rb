@@ -122,6 +122,12 @@ module ProMotion
       transaction.respond_to?(:payment) ? transaction.payment.productIdentifier : "all"
     end
 
+    def transaction_complete?(transactions)
+      states = transactions.map(&:transactionState)
+      return true unless states.include?(SKPaymentTransactionStatePurchasing)
+      false
+    end
+
     public
 
     # SKProductsRequestDelegate methods
@@ -160,6 +166,7 @@ module ProMotion
           end
         end
       end
+      iap_shutdown if transaction_complete?(transactions)
     end
 
     def paymentQueue(_, restoreCompletedTransactionsFailedWithError:error)
