@@ -47,8 +47,6 @@ module ProMotion
       @completion_handlers ||= {}
     end
 
-    # private methods
-
     private
 
     def iap_setup
