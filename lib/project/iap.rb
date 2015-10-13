@@ -175,4 +175,4 @@ module ProMotion
 
   end
 end
-::PM = ProMotion unless defined?(::PM)
+::PM = ProMotion unless defined?(PM)
