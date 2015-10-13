@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |spec|
   spec.name          = "ProMotion-iap"
-  spec.version       = "0.2.1.beta1"
+  spec.version       = "0.2.1"
   spec.authors       = ["Jamon Holmgren", "Kevin VanGelder"]
   spec.email         = ["jamon@clearsightstudio.com", "kevin@clearsightstudio.com"]
   spec.description   = %q{Adds in-app purchase support to ProMotion.}

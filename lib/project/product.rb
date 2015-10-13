@@ -20,7 +20,8 @@ module ProMotion
 
     def restore(&callback)
       restore_iaps(product_id) do |status, products|
-        callback.call status, products.find{|p| p[:product_id] == product_id }
+        product = products.is_a?(Hash) ? products : products.find{|p| p[:product_id] == product_id }
+        callback.call status, product
       end
     end
   end
