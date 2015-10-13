@@ -1,10 +1,12 @@
 # ProMotion-iap
 
 [![Gem Version](https://badge.fury.io/rb/ProMotion-iap.svg)](http://badge.fury.io/rb/ProMotion-iap)
-[![Build Status](https://travis-ci.org/clearsightstudio/ProMotion-iap.svg)](https://travis-ci.org/clearsightstudio/ProMotion-iap)
+[![Build Status](https://travis-ci.org/infinitered/ProMotion-iap.svg)](https://travis-ci.org/infinitered/ProMotion-iap)
 
 ProMotion-iap is in-app purchase notification support for the
- popular RubyMotion gem [ProMotion](https://github.com/clearsightstudio/ProMotion). It also works as a stand-alone gem if you are not using ProMotion.
+ popular RubyMotion gem [ProMotion](https://github.com/infinitered/ProMotion). It also works as a stand-alone gem if you are not using ProMotion.
+ 
+Read the introductory blog post here: [http://jamonholmgren.com/iap/](http://jamonholmgren.com/iap/)
 
 ## Installation
 
