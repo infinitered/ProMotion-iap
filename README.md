@@ -173,7 +173,9 @@ Restores a previously purchased IAP to the user (for example if they have upgrad
  will fail silently.
 
 
+#### Important Note
 
+In order for this library to work correctly, you must provide your, `app.identifier` to the Rakefile. 
 
 
 Find the Product ID here:
