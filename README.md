@@ -8,7 +8,7 @@ ProMotion-iap is in-app purchase notification support for the
  
 Read the introductory blog post here: [http://jamonholmgren.com/iap/](http://jamonholmgren.com/iap/)
 
-ProMotion-iap is maintained by [Infinite Red](http://infinite.red), a web and mobile development company based in Portland, OR and San Francisco, CA.
+ProMotion-iap was created by [Infinite Red](http://infinite.red), a web and mobile development company based in Portland, OR and San Francisco, CA. While you're welcome to use it, please note that we rely on the community to maintain it. We are happy to merge pull requests and release new versions but are no longer driving primary development.
 
 ## Installation
 
