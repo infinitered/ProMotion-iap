@@ -5,7 +5,7 @@
 
 ProMotion-iap is in-app purchase notification support for the
  popular RubyMotion gem [ProMotion](https://github.com/infinitered/ProMotion). It also works as a stand-alone gem if you are not using ProMotion.
- 
+
 Read the introductory blog post here: [http://jamonholmgren.com/iap/](http://jamonholmgren.com/iap/)
 
 ProMotion-iap was created by [Infinite Red](http://infinite.red), a web and mobile development company based in Portland, OR and San Francisco, CA. While you're welcome to use it, please note that we rely on the community to maintain it. We are happy to merge pull requests and release new versions but are no longer driving primary development.
@@ -175,7 +175,7 @@ Restores a previously purchased IAP to the user (for example if they have upgrad
 
 #### Important Note
 
-In order for this library to work correctly, you must provide your, `app.identifier` to the Rakefile. 
+In order for this library to work correctly, you must provide your, `app.identifier` to the Rakefile.
 
 
 Find the Product ID here:
@@ -201,3 +201,7 @@ Find the Product ID here:
 4. Make some specs pass
 5. Push to the branch (`git iap origin my-new-feature`)
 6. Create new Pull Request
+
+## Premium Support
+
+[ProMotion](https://github.com/infinitered/ProMotion) and [ProMotion-iap](https://github.com/infinitered/ProMotion-iap), as open source projects, are free to use and always will be. [Infinite Red](https://infinite.red/) offers premium ProMotion and ProMotion-iap support and general mobile app design/development services. Email us at [hello@infinite.red](mailto:hello@infinite.red) to get in touch with us for more details.
